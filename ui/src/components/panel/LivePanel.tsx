@@ -72,11 +72,12 @@ export function LivePanel({
     [allMetrics, layout, selectedMetricId]
   );
   const selected = metrics[0] ?? null;
+  const isEditing = editing && metrics.length > 0;
+  // The grid unmounts while editing; re-enable on Done so the remount refits.
   const gridRef = useSharedFitFontSize(
-    metrics.length > 0,
+    metrics.length > 0 && !isEditing,
     metrics.map((metric) => `${metric.id}=${metric.value}:${metric.unit ?? ''}`).join('|')
   );
-  const isEditing = editing && metrics.length > 0;
   const actions = isEditing ? (
     <>
       <PanelAction variant="secondary" onClick={() => resetLayout(layoutMode)}>
