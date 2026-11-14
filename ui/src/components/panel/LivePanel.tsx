@@ -74,7 +74,7 @@ export function LivePanel({
   const selected = metrics[0] ?? null;
   const gridRef = useSharedFitFontSize(
     metrics.length > 0,
-    metrics.map((metric) => `${metric.value}:${metric.unit ?? ''}`).join('|')
+    metrics.map((metric) => `${metric.id}=${metric.value}:${metric.unit ?? ''}`).join('|')
   );
   const isEditing = editing && metrics.length > 0;
   const actions = isEditing ? (
@@ -132,7 +132,7 @@ export function LivePanel({
         {isProfileNewShot ? <div className="shot-flash" /> : null}
         <div
           ref={gridRef}
-          className={`live-panel__grid live-panel__grid--of-${metrics.length}`}
+          className={`live-panel__grid live-panel__grid--of-${metrics.length}${columns * rows > metrics.length ? ' live-panel__grid--gap' : ''}`}
           style={{ gridTemplateColumns: `repeat(${columns}, 1fr)`, gridTemplateRows: `repeat(${rows}, 1fr)` }}
         >
           {metrics.map((metric) => (

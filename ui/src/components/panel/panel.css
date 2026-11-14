@@ -668,6 +668,12 @@
   font-size: 0.42em;
 }
 
+/* An odd tile count leaves one empty slot; fill it like a tile, not the gap color. */
+.live-panel__grid--gap::after {
+  content: '';
+  background: var(--color-surface);
+}
+
 /* Live tile editor: drag a tile onto another slot, tap to show or hide. */
 .live-layout-editor__tile {
   display: flex;
