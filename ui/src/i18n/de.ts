@@ -25,6 +25,12 @@ export const de: Messages = {
   'live.tiRadarDetail': 'Dieser Schlag nutzt einen geschätzten Abflugwinkel. {reason}',
   'live.dismiss': 'Ausblenden',
   'live.dismissAlert': 'TI-Radar-Hinweis ausblenden',
+  'live.editTiles': 'Kacheln anpassen',
+  'live.editDone': 'Fertig',
+  'live.editReset': 'Zurücksetzen',
+  'live.editHint': 'Kacheln ziehen zum Sortieren, tippen zum Ein- oder Ausblenden',
+  'live.tileShown': 'Sichtbar',
+  'live.tileHidden': 'Ausgeblendet',
 
   'replay.open': 'Wiederholung',
   'replay.title': 'Schlagwiederholung',

@@ -668,6 +668,63 @@
   font-size: 0.42em;
 }
 
+/* Live tile editor: drag a tile onto another slot, tap to show or hide. */
+.live-layout-editor__tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.35rem;
+  min-width: 0;
+  padding: 0.5rem;
+  border: 0;
+  border-radius: 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.live-layout-editor__grip {
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--color-text-faint);
+}
+
+.live-layout-editor__label {
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.live-layout-editor__state {
+  font-weight: 600;
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.live-layout-editor__tile--hidden {
+  background: var(--color-hatch);
+  color: var(--color-text-faint);
+}
+
+.live-layout-editor__tile--hidden .live-layout-editor__state {
+  color: var(--color-text-faint);
+}
+
+.live-layout-editor__tile--dragging {
+  cursor: grabbing;
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
 /* ----------------------------------------------------------- stats panel -- */
 
 .stats-panel {

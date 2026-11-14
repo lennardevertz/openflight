@@ -274,3 +274,54 @@ export function pinSelectedMetric(metrics: LiveMetric[], selectedId: string | nu
 
   return [metrics[index], ...metrics.filter((_, i) => i !== index)];
 }
+
+/** Saved tile arrangement for one Live mode: display order plus hidden tiles. */
+export interface LiveLayout {
+  order: string[];
+  hidden: string[];
+}
+
+/**
+ * Order metrics by the saved layout. Ids the layout does not know (new metrics,
+ * or the other mode's ids) keep their canonical position after the known ones,
+ * so a stale layout never drops a metric.
+ */
+export function orderLiveMetrics(metrics: LiveMetric[], order: readonly string[] = []): LiveMetric[] {
+  const rank = new Map(order.map((id, index) => [id, index]));
+  return metrics
+    .map((metric, index) => ({ metric, index }))
+    .sort(
+      (a, b) => (rank.get(a.metric.id) ?? order.length + a.index) - (rank.get(b.metric.id) ?? order.length + b.index)
+    )
+    .map(({ metric }) => metric);
+}
+
+/**
+ * Apply a saved layout: custom order, hidden tiles removed. Always keeps at
+ * least one tile so the Live table never renders empty.
+ */
+export function applyLiveLayout(metrics: LiveMetric[], layout: LiveLayout | undefined): LiveMetric[] {
+  const ordered = orderLiveMetrics(metrics, layout?.order);
+  const hidden = new Set(layout?.hidden ?? []);
+  const visible = ordered.filter((metric) => !hidden.has(metric.id));
+  return visible.length > 0 ? visible : ordered.slice(0, 1);
+}
+
+/** Grid shape for a tile count: one row up to five tiles, otherwise two rows. */
+export function liveGridShape(count: number): { columns: number; rows: number } {
+  const rows = count > 5 ? 2 : 1;
+  return { columns: Math.max(1, Math.ceil(count / rows)), rows };
+}
+
+/** Move `id` to the slot currently held by `targetId`. */
+export function moveLiveMetric(order: readonly string[], id: string, targetId: string): string[] {
+  const from = order.indexOf(id);
+  const to = order.indexOf(targetId);
+  if (from === -1 || to === -1 || from === to) {
+    return [...order];
+  }
+  const next = [...order];
+  next.splice(from, 1);
+  next.splice(to, 0, id);
+  return next;
+}

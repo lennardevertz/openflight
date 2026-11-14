@@ -25,6 +25,12 @@ export const fr: Messages = {
   'live.tiRadarDetail': 'Ce coup a utilisé un angle de lancement estimé. {reason}',
   'live.dismiss': 'Fermer',
   'live.dismissAlert': 'Fermer l’alerte radar TI',
+  'live.editTiles': 'Modifier les tuiles',
+  'live.editDone': 'Terminé',
+  'live.editReset': 'Réinitialiser',
+  'live.editHint': 'Faites glisser les tuiles pour les réordonner, touchez pour afficher ou masquer',
+  'live.tileShown': 'Affichée',
+  'live.tileHidden': 'Masquée',
 
   'replay.open': 'Ralenti',
   'replay.title': 'Ralenti du coup',

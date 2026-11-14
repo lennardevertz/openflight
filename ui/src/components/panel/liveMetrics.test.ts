@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { Shot, SwingSpeedStats } from '../../types/shot';
 import {
+  applyLiveLayout,
   buildLiveMetrics,
+  liveGridShape,
   LIVE_METRIC_COUNT,
+  moveLiveMetric,
+  orderLiveMetrics,
   NO_VALUE,
   pinSelectedMetric,
   SWING_METRIC_COUNT,
@@ -295,5 +299,36 @@ describe('pinSelectedMetric', () => {
 
   it('handles an empty metric list', () => {
     expect(pinSelectedMetric([], 'ball_speed')).toEqual([]);
+  });
+});
+
+describe('live tile layout', () => {
+  const tiles = (...ids: string[]): LiveMetric[] => ids.map((id) => ({ id, label: id, value: '1' }));
+  const ids = (metrics: LiveMetric[]) => metrics.map((metric) => metric.id);
+
+  it('keeps canonical order without a saved layout', () => {
+    expect(ids(applyLiveLayout(tiles('a', 'b', 'c'), undefined))).toEqual(['a', 'b', 'c']);
+  });
+
+  it('applies the saved order and appends unknown ids in canonical order', () => {
+    expect(ids(orderLiveMetrics(tiles('a', 'b', 'c', 'd'), ['c', 'a']))).toEqual(['c', 'a', 'b', 'd']);
+  });
+
+  it('drops hidden tiles but never empties the table', () => {
+    expect(ids(applyLiveLayout(tiles('a', 'b', 'c'), { order: ['b', 'a', 'c'], hidden: ['a'] }))).toEqual(['b', 'c']);
+    expect(ids(applyLiveLayout(tiles('a', 'b'), { order: ['b', 'a'], hidden: ['a', 'b'] }))).toEqual(['b']);
+  });
+
+  it('moves a tile into the target slot', () => {
+    expect(moveLiveMetric(['a', 'b', 'c', 'd'], 'a', 'c')).toEqual(['b', 'c', 'a', 'd']);
+    expect(moveLiveMetric(['a', 'b', 'c', 'd'], 'd', 'b')).toEqual(['a', 'd', 'b', 'c']);
+    expect(moveLiveMetric(['a', 'b'], 'a', 'missing')).toEqual(['a', 'b']);
+  });
+
+  it('uses one row up to five tiles and two rows above that', () => {
+    expect(liveGridShape(10)).toEqual({ columns: 5, rows: 2 });
+    expect(liveGridShape(7)).toEqual({ columns: 4, rows: 2 });
+    expect(liveGridShape(5)).toEqual({ columns: 5, rows: 1 });
+    expect(liveGridShape(1)).toEqual({ columns: 1, rows: 1 });
   });
 });
