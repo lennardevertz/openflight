@@ -7,8 +7,8 @@ describe('i18n catalogs', () => {
     setActiveLocale('en');
   });
 
-  it('ships English, Spanish, French, and Portuguese', () => {
-    expect(LOCALES.map((locale) => locale.id)).toEqual(['en', 'es', 'fr', 'pt']);
+  it('ships English, German, Spanish, French, and Portuguese', () => {
+    expect(LOCALES.map((locale) => locale.id)).toEqual(['en', 'de', 'es', 'fr', 'pt']);
   });
 
   it('keeps every locale in lockstep with English keys', () => {
@@ -26,10 +26,14 @@ describe('i18n catalogs', () => {
     setActiveLocale('es');
     expect(t('nav.live')).toBe('En vivo');
     expect(t('profiles.shots', { count: '3' })).toBe('3 golpes');
+
+    setActiveLocale('de');
+    expect(t('nav.live')).toBe('Live');
+    expect(t('profiles.shots', { count: '3' })).toBe('3 Schläge');
   });
 
   it('falls back to English when a locale id is unknown', () => {
-    setActiveLocale('de');
+    setActiveLocale('xx');
     expect(t('nav.live')).toBe('Live');
   });
 });
