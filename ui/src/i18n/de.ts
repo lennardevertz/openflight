@@ -53,9 +53,9 @@ export const de: Messages = {
   'replay.tryAgain': 'Erneut versuchen',
   'replay.shot': 'Schlag {n} wiederholen',
 
-  'metric.ballSpeed': 'Ballgeschw.',
+  'metric.ballSpeed': 'Ballspeed',
   'metric.carry': 'Carry',
-  'metric.clubSpeed': 'Schlägergeschw.',
+  'metric.clubSpeed': 'Schlägerspeed',
   'metric.smash': 'Smash',
   'metric.vLaunch': 'V. Abflug',
   'metric.hLaunch': 'H. Abflug',
