@@ -834,7 +834,7 @@
 
 .gapping__row {
   display: grid;
-  grid-template-columns: 3.5rem 3rem 5.5rem minmax(0, 1fr) 4.5rem;
+  grid-template-columns: 5rem 4.5rem 6rem minmax(0, 1fr) 5rem;
   align-items: center;
   gap: 12px;
   min-height: 44px;
