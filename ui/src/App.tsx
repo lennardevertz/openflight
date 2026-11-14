@@ -16,6 +16,7 @@ import { ShotProcessingArea } from './components/ShotProcessingArea';
 import { ShutdownDialog, type ShutdownState } from './components/ShutdownDialog';
 import { CameraReplayDialog } from './components/CameraReplayDialog';
 import {
+  BagEditor,
   CameraPanel,
   LivePanel,
   ProfileNameDialog,
@@ -29,12 +30,14 @@ import {
   PickerOverlay,
   ShotsPanel,
   StatsPanel,
+  bagSections,
   clubSections,
   trainingImplementSections,
   type PanelView,
 } from './components/panel';
 import { filterShotsByProfile } from './types/shot';
 import type { Profile } from './types/profile';
+import { getProfileBag } from './data/bag';
 import { getClubName } from './data/clubs';
 import { getTrainingImplementLabel } from './data/trainingImplements';
 import { unlockAudioCue } from './utils/audioCue';
@@ -174,6 +177,10 @@ function AppContent() {
     setProfileDialog({ mode: 'add', target: null });
     setProfileDialogName('');
   };
+
+  const [bagProfileId, setBagProfileId] = useState<string | null>(null);
+  const bagProfile = profiles.find((profile) => profile.id === bagProfileId) ?? null;
+  const activeBag = getProfileBag(activeProfile);
 
   const openRenameProfile = (profile: Profile) => {
     setProfileDialog({ mode: 'rename', target: profile });
@@ -340,6 +347,7 @@ function AppContent() {
             loaded={profilesLoaded}
             onSelectProfile={handleSelectProfile}
             onRenameProfile={openRenameProfile}
+            onEditBag={(profile) => setBagProfileId(profile.id)}
             onRemoveProfile={handleRemoveProfile}
             headerAction={addProfileAction}
           />
@@ -436,11 +444,27 @@ function AppContent() {
         />
       ) : null}
 
+      {bagProfile ? (
+        <BagEditor
+          key={bagProfile.id}
+          profileName={bagProfile.name}
+          initialBag={getProfileBag(bagProfile).map((club) => club.id)}
+          onSave={(clubs) => socketService.setProfileBag(bagProfile.id, clubs)}
+          onClose={() => setBagProfileId(null)}
+        />
+      ) : null}
+
       {pickerOpen ? (
         <PickerOverlay
           title={isSwingSpeedMode ? t('app.selectImplement') : t('app.selectClub')}
           selectedId={isSwingSpeedMode ? selectedTrainingImplement : selectedClub}
-          sections={isSwingSpeedMode ? trainingImplementSections() : clubSections()}
+          sections={
+            isSwingSpeedMode
+              ? trainingImplementSections()
+              : activeBag.length > 0
+                ? bagSections(activeBag)
+                : clubSections()
+          }
           onSelect={handlePickerSelect}
           onClose={() => setPickerOpen(false)}
           wide={isSwingSpeedMode}

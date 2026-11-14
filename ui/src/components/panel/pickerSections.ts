@@ -1,3 +1,4 @@
+import type { Club } from '../../data/clubs';
 import { CLUBS_BY_TYPE } from '../../data/clubs';
 import { getTrainingImplementsByGroup } from '../../data/trainingImplements';
 
@@ -14,6 +15,11 @@ export interface PickerSection {
 /** Club sections for the picker, in the order `clubs.ts` declares them. */
 export function clubSections(): PickerSection[] {
   return Object.entries(CLUBS_BY_TYPE).map(([name, clubs]) => ({ name, options: clubs }));
+}
+
+/** A profile's bag as one tab-less section, so every club is on one screen. */
+export function bagSections(bag: ReadonlyArray<Club>): PickerSection[] {
+  return [{ name: 'Bag', options: bag }];
 }
 
 /** Training-implement sections, used in place of clubs during swing-speed mode. */

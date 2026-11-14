@@ -1379,6 +1379,74 @@
   padding: 0 16px;
 }
 
+.picker-overlay__option:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* -------------------------------------------------------------- bag editor -- */
+
+.bag-editor__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bag-editor__actions .panel-action {
+  height: 44px;
+  padding: 0 16px;
+}
+
+.bag-editor__count {
+  font-weight: 700;
+  font-size: 0.8125rem;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+.bag-editor__hint {
+  margin: 0;
+  padding: 0 26px 14px;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+/* Profile card: bag summary button, bottom-right. */
+.profiles-panel__bag {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  max-width: calc(100% - 140px);
+  height: 36px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-text);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.profiles-panel__bag-clubs {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-text-muted);
+  letter-spacing: 0.04em;
+}
+
 /* ----------------------------------------------------- profile name modal -- */
 
 .profile-name-modal {

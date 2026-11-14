@@ -94,6 +94,11 @@ export function registerHandlers(io: Server, session: MockSession): void {
       emitProfiles();
     });
 
+    socket.on('set_profile_bag', (data: { profile_id?: string; clubs?: unknown }) => {
+      session.setProfileBag(data?.profile_id, data?.clubs);
+      emitProfiles();
+    });
+
     socket.on('remove_profile', (data: { profile_id?: string }) => {
       session.removeProfile(data?.profile_id);
       emitProfiles();

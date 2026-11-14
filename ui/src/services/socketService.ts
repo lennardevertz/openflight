@@ -210,6 +210,10 @@ class SocketService {
     this.socket?.emit('rename_profile', { profile_id: profileId, name });
   }
 
+  setProfileBag(profileId: string, clubs: string[]) {
+    this.socket?.emit('set_profile_bag', { profile_id: profileId, clubs });
+  }
+
   removeProfile(profileId: string) {
     this.socket?.emit('remove_profile', { profile_id: profileId });
   }

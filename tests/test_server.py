@@ -2437,6 +2437,23 @@ class TestProfileSocketHandlers:
 
         assert self._last_snapshot(emitted)["profiles"][-1]["name"] == "Range"
 
+    def test_set_profile_bag_keeps_only_selectable_clubs(self, store, emitted):
+        added = store.add("Bagger")
+
+        server_module.handle_set_profile_bag(
+            {"profile_id": added.id, "clubs": ["driver", "unknown", "banana", 7, "pw"]}
+        )
+
+        assert self._last_snapshot(emitted)["profiles"][-1]["settings"]["bag"] == ["driver", "pw"]
+
+    def test_set_profile_bag_ignores_malformed_payload(self, store, emitted):
+        added = store.add("Bagger")
+
+        server_module.handle_set_profile_bag({"profile_id": added.id, "clubs": "driver"})
+        server_module.handle_set_profile_bag(None)
+
+        assert "bag" not in self._last_snapshot(emitted)["profiles"][-1]["settings"]
+
     def test_remove_profile_deletes_inactive(self, store, emitted):
         doomed = store.add("Doomed")
         store.add("Keeper")

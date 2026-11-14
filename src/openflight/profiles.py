@@ -28,6 +28,9 @@ PROFILES_PATH_ENV = "OPENFLIGHT_PROFILES_PATH"
 DEFAULT_PROFILE_NAME = "Profile 1"
 MAX_PROFILES = 12
 MAX_NAME_LENGTH = 40
+BAG_SETTINGS_KEY = "bag"
+# A bag must fit the club picker on one screen without tabs: 4 columns x 4 rows.
+MAX_BAG_CLUBS = 16
 
 
 def resolve_profiles_path(path: Union[str, Path, None] = None) -> Path:
@@ -165,6 +168,30 @@ class ProfileStore:
             if profile is None or profile.id == self._active_id or len(self._profiles) <= 1:
                 return False
             self._profiles.remove(profile)
+        self.save()
+        return True
+
+    def set_bag(self, profile_id: Any, clubs: List[str]) -> bool:
+        """Store a profile's bag (club ids, in order). An empty list clears it.
+
+        The caller validates club ids; this keeps the store free of club
+        knowledge. Duplicates are dropped and the list is capped at
+        ``MAX_BAG_CLUBS``.
+        """
+        cleaned: List[str] = []
+        for club in clubs:
+            if isinstance(club, str) and club and club not in cleaned:
+                cleaned.append(club)
+        cleaned = cleaned[:MAX_BAG_CLUBS]
+
+        with self._lock:
+            profile = self._find(profile_id)
+            if profile is None:
+                return False
+            if cleaned:
+                profile.settings[BAG_SETTINGS_KEY] = cleaned
+            else:
+                profile.settings.pop(BAG_SETTINGS_KEY, None)
         self.save()
         return True
 

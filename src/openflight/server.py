@@ -2259,6 +2259,22 @@ def handle_remove_profile(data=None):
     _emit_profiles()
 
 
+def _clean_bag(raw) -> list:
+    """Keep only selectable club ids from a bag payload."""
+    if not isinstance(raw, list):
+        return []
+    selectable = {club.value for club in ClubType if club is not ClubType.UNKNOWN}
+    return [club for club in raw if isinstance(club, str) and club in selectable]
+
+
+@socketio.on("set_profile_bag")
+def handle_set_profile_bag(data=None):
+    """Set the clubs a profile carries; the club picker then shows only those."""
+    payload = _payload_dict(data)
+    get_profile_store().set_bag(payload.get("profile_id"), _clean_bag(payload.get("clubs")))
+    _emit_profiles()
+
+
 @socketio.on("set_training_implement")
 def handle_set_training_implement(data):
     """Handle swing speed training implement selection."""
