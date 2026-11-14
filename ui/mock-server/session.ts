@@ -5,6 +5,7 @@
 import type { SessionStats, Shot, TriggerStatus } from '../src/types/shot.js';
 import type { RadarConfig } from '../src/types/socket.js';
 import type { Profile } from '../src/types/profile.js';
+import { cleanBag } from '../src/data/bag.js';
 import { generateShot } from './shotGenerator.js';
 
 function mean(values: number[]): number {
@@ -55,9 +56,7 @@ export function computeSessionStats(shots: Shot[]): SessionStats {
 export class MockSession {
   shots: Shot[] = [];
   club = 'driver';
-  profiles: Profile[] = [
-    { id: 'mock-profile-1', name: 'Profile 1', created_at: '2026-01-01T00:00:00Z', settings: {} },
-  ];
+  profiles: Profile[] = [{ id: 'mock-profile-1', name: 'Profile 1', created_at: '2026-01-01T00:00:00Z', settings: {} }];
   activeProfileId = 'mock-profile-1';
   private nextProfileNumber = 2;
   trainingImplement = 'driver';
@@ -85,7 +84,9 @@ export class MockSession {
   }
 
   addProfile(rawName: unknown): void {
-    const name = String(rawName ?? '').trim().slice(0, 40);
+    const name = String(rawName ?? '')
+      .trim()
+      .slice(0, 40);
     if (!name || this.profiles.length >= 12) return;
     const profile: Profile = {
       id: `mock-profile-${this.nextProfileNumber++}`,
@@ -98,10 +99,25 @@ export class MockSession {
   }
 
   renameProfile(profileId: unknown, rawName: unknown): void {
-    const name = String(rawName ?? '').trim().slice(0, 40);
+    const name = String(rawName ?? '')
+      .trim()
+      .slice(0, 40);
     const profile = this.profiles.find((entry) => entry.id === profileId);
     if (!name || !profile) return;
     profile.name = name;
+  }
+
+  setProfileBag(profileId: unknown, rawClubs: unknown): void {
+    const profile = this.profiles.find((entry) => entry.id === profileId);
+    if (!profile) return;
+    const clubs = cleanBag(rawClubs);
+    const settings = { ...profile.settings };
+    if (clubs.length > 0) {
+      settings.bag = clubs;
+    } else {
+      delete settings.bag;
+    }
+    profile.settings = settings;
   }
 
   removeProfile(profileId: unknown): void {

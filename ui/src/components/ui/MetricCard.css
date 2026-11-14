@@ -263,3 +263,28 @@
     padding: 1px 5px;
   }
 }
+
+/* Good / too low / too high for the club. */
+.metric-card__guidance {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  font-weight: 700;
+  font-size: clamp(0.6875rem, 1.2vw, 0.8125rem);
+  line-height: 1.15;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+}
+
+.metric-card__guidance--good {
+  color: var(--color-success);
+}
+
+.metric-card__guidance--low,
+.metric-card__guidance--high {
+  color: var(--color-danger);
+}
+
+.metric-card__guidance--off {
+  color: var(--color-warning);
+}

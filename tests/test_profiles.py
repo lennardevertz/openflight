@@ -6,8 +6,10 @@ from pathlib import Path
 import pytest
 
 from openflight.profiles import (
+    BAG_SETTINGS_KEY,
     DEFAULT_PROFILE_NAME,
     DEFAULT_PROFILES_PATH,
+    MAX_BAG_CLUBS,
     MAX_PROFILES,
     PROFILES_PATH_ENV,
     Profile,
@@ -425,3 +427,40 @@ class TestEnvDoesNotTouchUserConfig:
         assert user_roster.read_text(encoding="utf-8") == "do-not-touch"
         assert isolated.exists()
         assert isolated != user_roster
+
+
+class TestBag:
+    """A profile's bag lives in settings and survives a reload."""
+
+    def test_set_bag_persists_in_settings(self, store_path):
+        store = ProfileStore(store_path)
+        profile_id = store.get_active().id
+
+        assert store.set_bag(profile_id, ["driver", "7-iron", "driver", "pw"])
+
+        assert store.get_active().settings[BAG_SETTINGS_KEY] == ["driver", "7-iron", "pw"]
+        reloaded = ProfileStore(store_path)
+        assert reloaded.get_active().settings[BAG_SETTINGS_KEY] == ["driver", "7-iron", "pw"]
+
+    def test_bag_is_capped(self, store_path):
+        store = ProfileStore(store_path)
+        clubs = [f"club-{index}" for index in range(MAX_BAG_CLUBS + 4)]
+
+        store.set_bag(store.get_active().id, clubs)
+
+        assert len(store.get_active().settings[BAG_SETTINGS_KEY]) == MAX_BAG_CLUBS
+
+    def test_empty_bag_clears_the_key_and_keeps_other_settings(self, store_path):
+        store = ProfileStore(store_path)
+        profile = store.get_active()
+        profile.settings["other"] = 1
+        store.set_bag(profile.id, ["driver"])
+
+        store.set_bag(profile.id, [])
+
+        assert store.get_active().settings == {"other": 1}
+
+    def test_unknown_profile_is_refused(self, store_path):
+        store = ProfileStore(store_path)
+
+        assert not store.set_bag("missing", ["driver"])

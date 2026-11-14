@@ -97,4 +97,15 @@ describe('ProfilesPanel', () => {
     expect(html).not.toContain('Home');
     expect(html).not.toContain('Range');
   });
+
+  it('shows each bag on its profile card, or all clubs when none is set', () => {
+    const html = render({
+      profiles: [{ ...profile('aaa', 'Home'), settings: { bag: ['7-iron', 'driver'] } }, profile('bbb', 'Range')],
+      onEditBag: () => {},
+    });
+
+    expect(html).toContain('aria-label="Edit bag for Home"');
+    expect(html).toContain('DR 7i');
+    expect(html).toContain('All clubs');
+  });
 });

@@ -1,3 +1,4 @@
+import type { MetricGuidance } from '../../data/guidance';
 import type { SpinQuality } from '../../types/shot';
 import { t } from '../../i18n';
 import './MetricCard.css';
@@ -23,6 +24,17 @@ export interface MetricCardProps {
   onClick?: () => void;
   /** Marks an interactive card as the currently promoted one (`aria-pressed`). */
   selected?: boolean;
+  /** Good / too low / too high for the club, with the target. */
+  guidance?: MetricGuidance;
+}
+
+const GUIDANCE_MARK: Record<MetricGuidance['status'], string> = { good: '✓', low: '▼', high: '▲', off: '•' };
+
+function confidenceText(confidence: SpinQuality): string {
+  if (confidence === 'high' || confidence === 'medium' || confidence === 'low') {
+    return t(`confidence.${confidence}`);
+  }
+  return confidence;
 }
 
 export function EstimatedMark() {
@@ -50,6 +62,7 @@ export function MetricCard({
   onClick,
   selected,
   estimated,
+  guidance,
 }: MetricCardProps) {
   const classes = ['metric-card', `metric-card--${variant}`, `metric-card--label-${labelPosition}`];
   if (size === 'hero') {
@@ -70,6 +83,11 @@ export function MetricCard({
   );
   const meta = (
     <>
+      {guidance ? (
+        <span className={`metric-card__guidance metric-card__guidance--${guidance.status}`}>
+          <span aria-hidden="true">{GUIDANCE_MARK[guidance.status]}</span> {guidance.text}
+        </span>
+      ) : null}
       {subtext ? <span className="metric-card__subtext metric-card__confidence-label">{subtext}</span> : null}
       {confidence ? (
         <div className={`metric-card__confidence metric-card__confidence--${confidence}`}>
@@ -80,7 +98,7 @@ export function MetricCard({
               <span className={`dot ${confidence === 'high' ? 'filled' : ''}`} />
             </span>
           ) : null}
-          <span className="metric-card__confidence-label">{confidenceLabel ?? confidence}</span>
+          <span className="metric-card__confidence-label">{confidenceLabel ?? confidenceText(confidence)}</span>
         </div>
       ) : null}
     </>

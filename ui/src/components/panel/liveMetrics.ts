@@ -3,6 +3,15 @@ import { getSwingSpeedMph, isSwingSpeedShot } from '../../types/shot';
 import type { UnitSystem } from '../../utils/units';
 import { formatDistance, formatSpeed, getDistanceUnit, getSpeedUnit } from '../../utils/units';
 import { getHtmlLang, t } from '../../i18n';
+import {
+  attackGuidance,
+  directionGuidance,
+  launchGuidance,
+  pathGuidance,
+  smashGuidance,
+  spinGuidance,
+  type MetricGuidance,
+} from '../../data/guidance';
 
 /** Placeholder for a metric the current shot has no value for. */
 export const NO_VALUE = '—';
@@ -19,6 +28,8 @@ export interface LiveMetric {
   confidence?: SpinQuality | null;
   /** Override confidence copy while preserving its dot level. */
   confidenceLabel?: string;
+  /** Is the value good for this club? Shown as a colored line under the value. */
+  guidance?: MetricGuidance;
 }
 
 /**
@@ -125,6 +136,7 @@ function buildBallStrikeMetrics(shot: Shot, unitSystem: UnitSystem): LiveMetric[
       id: 'smash',
       label: t('metric.smash'),
       value: shot.smash_factor === null ? NO_VALUE : shot.smash_factor.toFixed(2),
+      guidance: smashGuidance(shot.smash_factor, shot.club),
     },
     {
       id: 'launch_v',
@@ -133,6 +145,7 @@ function buildBallStrikeMetrics(shot: Shot, unitSystem: UnitSystem): LiveMetric[
       unit: angleUnit(shot.launch_angle_vertical),
       estimated: markEstimated(shot.launch_angle_vertical !== null && angleEstimated),
       confidence: shot.launch_angle_vertical === null ? null : angleConfidence,
+      guidance: launchGuidance(shot.launch_angle_vertical, shot.club),
     },
     {
       id: 'launch_h',
@@ -143,6 +156,7 @@ function buildBallStrikeMetrics(shot: Shot, unitSystem: UnitSystem): LiveMetric[
       estimated: markEstimated(shot.launch_angle_horizontal !== null && angleEstimated),
       confidence: shot.launch_angle_horizontal === null ? null : angleConfidence,
       confidenceLabel: horizontalLaunchIsCameraAssisted ? 'experimental' : undefined,
+      guidance: directionGuidance(shot.launch_angle_horizontal),
     },
     {
       id: 'spin',
@@ -151,6 +165,7 @@ function buildBallStrikeMetrics(shot: Shot, unitSystem: UnitSystem): LiveMetric[
       unit: shot.spin_rpm === null ? undefined : 'rpm',
       estimated: markEstimated(shot.spin_rpm !== null && shot.spin_source === 'calculated'),
       confidence: shot.spin_rpm === null ? null : shot.spin_quality,
+      guidance: spinGuidance(shot.spin_rpm, shot.club),
     },
     {
       id: 'spin_axis',
@@ -176,6 +191,7 @@ function buildBallStrikeMetrics(shot: Shot, unitSystem: UnitSystem): LiveMetric[
               : undefined,
       confidence: clubPathIsExperimental ? (shot.experimental_fused_club_path_confidence ?? 'experimental') : null,
       confidenceLabel: shot.experimental_fused_club_path_confidence ? 'experimental' : undefined,
+      guidance: pathGuidance(clubPath),
     },
     {
       id: 'club_aoa',
@@ -194,6 +210,7 @@ function buildBallStrikeMetrics(shot: Shot, unitSystem: UnitSystem): LiveMetric[
               : undefined,
       confidence: attackIsExperimental ? (shot.experimental_fused_attack_angle_confidence ?? 'experimental') : null,
       confidenceLabel: shot.experimental_fused_attack_angle_confidence ? 'experimental' : undefined,
+      guidance: attackGuidance(attackAngle, shot.club),
     },
   ];
 }
@@ -273,4 +290,55 @@ export function pinSelectedMetric(metrics: LiveMetric[], selectedId: string | nu
   const index = selectedIndex === -1 ? 0 : selectedIndex;
 
   return [metrics[index], ...metrics.filter((_, i) => i !== index)];
+}
+
+/** Saved tile arrangement for one Live mode: display order plus hidden tiles. */
+export interface LiveLayout {
+  order: string[];
+  hidden: string[];
+}
+
+/**
+ * Order metrics by the saved layout. Ids the layout does not know (new metrics,
+ * or the other mode's ids) keep their canonical position after the known ones,
+ * so a stale layout never drops a metric.
+ */
+export function orderLiveMetrics(metrics: LiveMetric[], order: readonly string[] = []): LiveMetric[] {
+  const rank = new Map(order.map((id, index) => [id, index]));
+  return metrics
+    .map((metric, index) => ({ metric, index }))
+    .sort(
+      (a, b) => (rank.get(a.metric.id) ?? order.length + a.index) - (rank.get(b.metric.id) ?? order.length + b.index)
+    )
+    .map(({ metric }) => metric);
+}
+
+/**
+ * Apply a saved layout: custom order, hidden tiles removed. Always keeps at
+ * least one tile so the Live table never renders empty.
+ */
+export function applyLiveLayout(metrics: LiveMetric[], layout: LiveLayout | undefined): LiveMetric[] {
+  const ordered = orderLiveMetrics(metrics, layout?.order);
+  const hidden = new Set(layout?.hidden ?? []);
+  const visible = ordered.filter((metric) => !hidden.has(metric.id));
+  return visible.length > 0 ? visible : ordered.slice(0, 1);
+}
+
+/** Grid shape for a tile count: one row up to five tiles, otherwise two rows. */
+export function liveGridShape(count: number): { columns: number; rows: number } {
+  const rows = count > 5 ? 2 : 1;
+  return { columns: Math.max(1, Math.ceil(count / rows)), rows };
+}
+
+/** Move `id` to the slot currently held by `targetId`. */
+export function moveLiveMetric(order: readonly string[], id: string, targetId: string): string[] {
+  const from = order.indexOf(id);
+  const to = order.indexOf(targetId);
+  if (from === -1 || to === -1 || from === to) {
+    return [...order];
+  }
+  const next = [...order];
+  next.splice(from, 1);
+  next.splice(to, 0, id);
+  return next;
 }

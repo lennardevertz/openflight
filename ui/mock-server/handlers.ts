@@ -94,6 +94,18 @@ export function registerHandlers(io: Server, session: MockSession): void {
       emitProfiles();
     });
 
+    // The mock keeps no logs, so its history is this session's shots.
+    socket.on('get_history', (data: { profile_id?: string }) => {
+      const profileId = data?.profile_id || session.activeProfile.id;
+      const shots = session.shots.filter((shot) => shot.profile_id === profileId);
+      socket.emit('history', { profile_id: profileId, shots, session_count: shots.length > 0 ? 1 : 0 });
+    });
+
+    socket.on('set_profile_bag', (data: { profile_id?: string; clubs?: unknown }) => {
+      session.setProfileBag(data?.profile_id, data?.clubs);
+      emitProfiles();
+    });
+
     socket.on('remove_profile', (data: { profile_id?: string }) => {
       session.removeProfile(data?.profile_id);
       emitProfiles();

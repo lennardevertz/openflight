@@ -1,6 +1,7 @@
 import { useMemo, useRef, type ReactNode } from 'react';
 import type { Profile } from '../../types/profile';
 import type { Shot } from '../../types/shot';
+import { getProfileBag } from '../../data/bag';
 import { useDragScroll } from '../../hooks/useDragScroll';
 import { useI18n } from '../../i18n/useI18n';
 import { PanelHeader } from './PanelHeader';
@@ -14,6 +15,8 @@ interface ProfilesPanelProps {
   onSelectProfile: (profileId: string) => void;
   onRenameProfile: (profile: Profile) => void;
   onRemoveProfile: (profileId: string) => void;
+  /** Opens the bag editor for a profile. */
+  onEditBag?: (profile: Profile) => void;
   /** Pinned header control, e.g. Add profile. */
   headerAction?: ReactNode;
 }
@@ -26,6 +29,7 @@ export function ProfilesPanel({
   onSelectProfile,
   onRenameProfile,
   onRemoveProfile,
+  onEditBag,
   headerAction,
 }: ProfilesPanelProps) {
   const { t } = useI18n();
@@ -80,6 +84,7 @@ export function ProfilesPanel({
                   <span className="profiles-panel__name">{profile.name}</span>
                   <span className="profiles-panel__count">{shotLabel}</span>
                 </button>
+                {onEditBag ? <BagButton profile={profile} onClick={() => onEditBag(profile)} /> : null}
                 <div className="profiles-panel__actions">
                   <button
                     type="button"
@@ -106,5 +111,23 @@ export function ProfilesPanel({
         )}
       </div>
     </div>
+  );
+}
+
+function BagButton({ profile, onClick }: { profile: Profile; onClick: () => void }) {
+  const { t } = useI18n();
+  const bag = getProfileBag(profile);
+  return (
+    <button
+      type="button"
+      className="profiles-panel__bag"
+      aria-label={t('bag.editNamed', { name: profile.name })}
+      onClick={onClick}
+    >
+      <span>{t('bag.label')}</span>
+      <span className="profiles-panel__bag-clubs">
+        {bag.length > 0 ? bag.map((club) => club.label).join(' ') : t('bag.allClubs')}
+      </span>
+    </button>
   );
 }

@@ -668,6 +668,69 @@
   font-size: 0.42em;
 }
 
+/* An odd tile count leaves one empty slot; fill it like a tile, not the gap color. */
+.live-panel__grid--gap::after {
+  content: '';
+  background: var(--color-surface);
+}
+
+/* Live tile editor: drag a tile onto another slot, tap to show or hide. */
+.live-layout-editor__tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.35rem;
+  min-width: 0;
+  padding: 0.5rem;
+  border: 0;
+  border-radius: 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  text-align: left;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.live-layout-editor__grip {
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--color-text-faint);
+}
+
+.live-layout-editor__label {
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.live-layout-editor__state {
+  font-weight: 600;
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.live-layout-editor__tile--hidden {
+  background: var(--color-hatch);
+  color: var(--color-text-faint);
+}
+
+.live-layout-editor__tile--hidden .live-layout-editor__state {
+  color: var(--color-text-faint);
+}
+
+.live-layout-editor__tile--dragging {
+  cursor: grabbing;
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
 /* ----------------------------------------------------------- stats panel -- */
 
 .stats-panel {
@@ -734,6 +797,104 @@
   font-size: clamp(2.45rem, 11vh, 3.9rem);
   font-weight: 700;
   letter-spacing: -0.03em;
+}
+
+.stats-panel__scopes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  padding: 12px 26px 0;
+}
+
+.stats-panel__scopes .panel-action {
+  height: var(--panel-control-height, 32px);
+  padding: 0 14px;
+  font-size: 0.625rem;
+}
+
+.stats-panel__scope-meta {
+  margin-left: auto;
+  font-weight: 600;
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* Gapping: one row per club, longest first. */
+.gapping {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px 26px 16px;
+  touch-action: none;
+  user-select: none;
+}
+
+.gapping__row {
+  display: grid;
+  grid-template-columns: 5rem 4.5rem 6rem minmax(0, 1fr) 5rem;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  border-bottom: 1px solid var(--color-border-soft);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+}
+
+.gapping__row--head {
+  min-height: 32px;
+  font-weight: 600;
+  font-size: 0.625rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.gapping__club {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.gapping__carry {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.gapping__carry small {
+  font-size: 0.65em;
+  color: var(--color-text-muted);
+}
+
+.gapping__range {
+  position: relative;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--color-border-soft);
+}
+
+.gapping__bar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--color-accent) 45%, transparent);
+}
+
+.gapping__avg {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 3px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: var(--color-accent);
+}
+
+.gapping__gap {
+  color: var(--color-text-muted);
+  text-align: right;
 }
 
 /* --------------------------------------------------------- profiles panel -- */
@@ -1314,6 +1475,117 @@
   font-size: clamp(0.9375rem, 2.8vh, 1.25rem);
   letter-spacing: 0.02em;
   padding: 0 16px;
+}
+
+.picker-overlay__option:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* -------------------------------------------------------------- live help -- */
+
+.live-help__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px 26px 20px;
+}
+
+.live-help__row {
+  display: grid;
+  grid-template-columns: 11rem minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: baseline;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border-soft);
+}
+
+.live-help__name {
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.live-help__text {
+  font-size: 0.875rem;
+  line-height: 1.35;
+  color: var(--color-text-muted);
+}
+
+.live-help__target {
+  font-weight: 700;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.live-help__source {
+  margin: 14px 0 0;
+  font-size: 0.75rem;
+  color: var(--color-text-faint);
+}
+
+/* -------------------------------------------------------------- bag editor -- */
+
+.bag-editor__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bag-editor__actions .panel-action {
+  height: 44px;
+  padding: 0 16px;
+}
+
+.bag-editor__count {
+  font-weight: 700;
+  font-size: 0.8125rem;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-muted);
+}
+
+.bag-editor__hint {
+  margin: 0;
+  padding: 0 26px 14px;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+/* Profile card: bag summary button, bottom-right. */
+.profiles-panel__bag {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  max-width: calc(100% - 140px);
+  height: 36px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-text);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.profiles-panel__bag-clubs {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-text-muted);
+  letter-spacing: 0.04em;
 }
 
 /* ----------------------------------------------------- profile name modal -- */
