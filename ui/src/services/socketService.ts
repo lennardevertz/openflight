@@ -16,7 +16,9 @@ import { getServerOrigin } from '../utils/serverOrigin';
 import { handleShotMessage, handleShotUpdate, type ShotMessage, type ShotUpdateMessage } from './handleShotMessage';
 import { ingestSessionClub } from './sessionClubSync';
 import { remainingShotsAfterClear } from './sessionClear';
+import { useHistoryStore } from '../stores/useHistoryStore';
 import { useProfileStore } from '../stores/useProfileStore';
+import type { HistorySnapshot } from '../types/history';
 import type { ProfilesSnapshot } from '../types/profile';
 
 const SOCKET_URL = getServerOrigin();
@@ -110,6 +112,10 @@ class SocketService {
 
     this.socket.on('profiles', (data: ProfilesSnapshot) => {
       useProfileStore.getState().applySnapshot(data);
+    });
+
+    this.socket.on('history', (data: HistorySnapshot) => {
+      useHistoryStore.getState().applySnapshot(data);
     });
 
     this.socket.on('session_state', (data: SessionState & { mock_mode?: boolean; debug_mode?: boolean }) => {
@@ -208,6 +214,10 @@ class SocketService {
 
   renameProfile(profileId: string, name: string) {
     this.socket?.emit('rename_profile', { profile_id: profileId, name });
+  }
+
+  getHistory(profileId: string) {
+    this.socket?.emit('get_history', { profile_id: profileId });
   }
 
   setProfileBag(profileId: string, clubs: string[]) {

@@ -42,6 +42,7 @@ from .clubs.physics import (
     get_club_physics,
     get_club_simulation_profile,
 )
+from .history import get_shot_history
 from .launch_monitor import SPIN_CONFIDENCE_HIGH, SPIN_CONFIDENCE_RELIABLE, Shot, summarize_shots
 from .ops243 import (
     UART_BAUD_COMMANDS,
@@ -60,7 +61,12 @@ from .phone_orientation import (
 from .power import SUPPORTED_BATTERY_PROVIDERS, PowerMonitor, PowerStatus
 from .profiles import ProfileStore
 from .rolling_buffer.monitor import estimate_carry_with_spin, get_optimal_spin_for_ball_speed
-from .session_logger import get_session_logger, init_session_logger, log_session_error
+from .session_logger import (
+    SessionLogger,
+    get_session_logger,
+    init_session_logger,
+    log_session_error,
+)
 from .shot_stream import SSE_MIMETYPE, ShotStreamBroker, ShotStreamFull
 from .sim import (
     IncompleteShotError,
@@ -2357,6 +2363,23 @@ def handle_clear_session(data=None):
     apply_clear_session(data)
 
 
+def request_history(payload=None):
+    """Send one profile's shot history from the session logs (default: active profile)."""
+    raw_id = _payload_dict(payload).get("profile_id")
+    profile_id = str(raw_id).strip() if raw_id else get_profile_store().get_active().id
+    session_logger = get_session_logger()
+    log_dir = session_logger.log_dir if session_logger else SessionLogger.DEFAULT_LOG_DIR
+    history = get_shot_history(log_dir).for_profile(profile_id, include_mock=mock_mode)
+    socketio.emit("history", history)
+    return history, 200
+
+
+@socketio.on("get_history")
+def handle_get_history(data=None):
+    """Send a profile's long-term shot history."""
+    request_history(data)
+
+
 @socketio.on("upload_cloud")
 def handle_upload_cloud():
     """Manually trigger upload of completed session logs."""
@@ -2379,6 +2402,9 @@ def apply_delete_shot(payload):
         socketio.emit("delete_shot_error", {"error": "Shot not found"})
         return {"error": "Shot not found"}, 404
 
+    session_logger = get_session_logger()
+    if session_logger:
+        session_logger.log_shot_deleted(str(timestamp))
     socketio.emit("session_state", _session_state_payload())
     # Remembered so a phone that is away now hears of it when it reconnects.
     phone_shot_cache.remember_deletion(timestamp)

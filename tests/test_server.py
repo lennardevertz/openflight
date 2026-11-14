@@ -2437,6 +2437,35 @@ class TestProfileSocketHandlers:
 
         assert self._last_snapshot(emitted)["profiles"][-1]["name"] == "Range"
 
+    def test_get_history_reads_the_active_profiles_logged_shots(
+        self, store, emitted, tmp_path, monkeypatch
+    ):
+        import json as json_module
+        from types import SimpleNamespace
+
+        log_dir = tmp_path / "sessions"
+        log_dir.mkdir()
+        active = store.get_active().id
+        lines = [
+            {"type": "shot_detected", "timestamp": "t1", "club": "driver", "profile_id": active,
+             "mode": "rolling-buffer", "ball_speed_mph": 150.0},
+            {"type": "shot_detected", "timestamp": "t2", "club": "driver", "profile_id": "other",
+             "mode": "rolling-buffer", "ball_speed_mph": 140.0},
+        ]
+        (log_dir / "session_1.jsonl").write_text(
+            "".join(json_module.dumps(line) + "\n" for line in lines), encoding="utf-8"
+        )
+        monkeypatch.setattr(
+            server_module, "get_session_logger", lambda: SimpleNamespace(log_dir=log_dir)
+        )
+        monkeypatch.setattr(server_module, "mock_mode", False)
+
+        server_module.handle_get_history({})
+
+        history = next(payload for name, payload in reversed(emitted) if name == "history")
+        assert history["profile_id"] == active
+        assert [shot["timestamp"] for shot in history["shots"]] == ["t1"]
+
     def test_set_profile_bag_keeps_only_selectable_clubs(self, store, emitted):
         added = store.add("Bagger")
 

@@ -226,7 +226,9 @@ export function computeSwingSpeedStats(shots: Shot[], filter: SwingSpeedStatsFil
 /**
  * Compute session stats from an array of shots.
  */
-export function computeStats(shots: Shot[]): SessionStats {
+export function computeStats(
+  shots: ReadonlyArray<Pick<Shot, 'ball_speed_mph' | 'club_speed_mph' | 'smash_factor' | 'estimated_carry_yards'>>
+): SessionStats {
   if (shots.length === 0) {
     return {
       shot_count: 0,
@@ -266,7 +268,7 @@ export function computeStats(shots: Shot[]): SessionStats {
 /**
  * Get unique clubs from shots array.
  */
-export function getUniqueClubs(shots: Shot[]): string[] {
+export function getUniqueClubs(shots: ReadonlyArray<Pick<Shot, 'club'>>): string[] {
   const clubs = new Set(shots.map((s) => s.club));
   return Array.from(clubs);
 }

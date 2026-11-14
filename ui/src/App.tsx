@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useSocket } from './hooks/useSocket';
 import { useSystemStore } from './stores/useSystemStore';
@@ -161,6 +161,10 @@ function AppContent() {
       window.removeEventListener('keydown', unlock);
     };
   }, []);
+
+  const requestHistory = useCallback(() => {
+    if (activeProfileId) socketService.getHistory(activeProfileId);
+  }, [activeProfileId]);
 
   const handleSelectProfile = (profileId: string) => {
     socketService.setActiveProfile(profileId);
@@ -359,6 +363,7 @@ function AppContent() {
             profileId={activeProfileId}
             profileName={activeProfileName}
             headerAction={clearSessionAction}
+            onRequestHistory={requestHistory}
           />
         )}
         {currentView === 'shots' && (

@@ -6,6 +6,7 @@ import { useI18n } from '../../i18n/useI18n';
 import { useSharedFitFontSize } from '../../hooks/useFitFontSize';
 import { useLiveLayoutStore } from '../../stores/useLiveLayoutStore';
 import { MetricCard } from '../ui/MetricCard';
+import { LiveHelp } from './LiveHelp';
 import { LiveLayoutEditor } from './LiveLayoutEditor';
 import { PanelAction } from './PanelAction';
 import { PanelHeader } from './PanelHeader';
@@ -60,6 +61,7 @@ export function LivePanel({
   const setLayout = useLiveLayoutStore((state) => state.setLayout);
   const resetLayout = useLiveLayoutStore((state) => state.resetLayout);
   const [editing, setEditing] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const allMetrics = useMemo(
     () => (displayedShot ? buildLiveMetrics(displayedShot, unitSystem, swingStats) : []),
     // locale is not read in the factory; t() is a stable import. Without it,
@@ -88,9 +90,14 @@ export function LivePanel({
   ) : (
     <>
       {metrics.length > 0 ? (
-        <PanelAction variant="secondary" onClick={() => setEditing(true)}>
-          {t('live.editTiles')}
-        </PanelAction>
+        <>
+          <PanelAction variant="secondary" onClick={() => setHelpOpen(true)} aria-label={t('guide.open')}>
+            ?
+          </PanelAction>
+          <PanelAction variant="secondary" onClick={() => setEditing(true)}>
+            {t('live.editTiles')}
+          </PanelAction>
+        </>
       ) : null}
       {headerAction}
     </>
@@ -129,6 +136,7 @@ export function LivePanel({
   return (
     <div className="panel">
       {header}
+      {helpOpen ? <LiveHelp metrics={allMetrics} onClose={() => setHelpOpen(false)} /> : null}
       <div className="panel__body live-panel__body">
         {isProfileNewShot ? <div className="shot-flash" /> : null}
         <div
@@ -146,6 +154,7 @@ export function LivePanel({
               estimated={metric.estimated}
               confidence={metric.confidence}
               confidenceLabel={metric.confidenceLabel}
+              guidance={metric.guidance}
               labelPosition="above"
               selected={metric.id === selected.id}
               onClick={onSelectMetric ? () => onSelectMetric(metric.id) : undefined}

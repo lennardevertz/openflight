@@ -57,6 +57,7 @@ class SessionLogger:
     - session_start: Session metadata
     - session_end: Session summary
     - shot_detected: A shot was recorded
+    - shot_deleted: A recorded shot was deleted (keyed by its timestamp)
     - config_change: Radar configuration changed
     - error: Processing failures (component, context, optional exception metadata)
     """
@@ -306,6 +307,12 @@ class SessionLogger:
             data["pipeline_ms"] = pipeline_ms
 
         self._write_entry("shot_detected", data)
+
+    def log_shot_deleted(self, timestamp: str):
+        """Record that a shot was deleted, so history readers can skip it."""
+        if not self.enabled:
+            return
+        self._write_entry("shot_deleted", {"timestamp": timestamp})
 
     def log_camera_capture(
         self,
